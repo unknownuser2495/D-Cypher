@@ -106,6 +106,7 @@ def stego_extract():
 
     except FileNotFoundError:
         print("No file has been encrypted yet")
+        exit()
 
     name_of_file_1 = filedialog.askopenfilename(initialdir = "/",
                                             title = "Select the file that you want to extract data from",
@@ -134,7 +135,7 @@ def stego_extract():
         print("Cannot decode content from this file")
         exit()'''
 
-    EOF =  b'\xFF\xD9' if (name_of_file_1_[-4] ==  ".jpg" or name_of_file_1_ == ".jpeg") else b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82'
+    EOF =  b'\xFF\xD9' if (name_of_file_1_[-4:] ==  ".jpg" or name_of_file_1_ == ".jpeg") else b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82'
     
     '''if (name_of_file_1_[-4] ==  ".jpg"):
         EOF = b'\xFF\xD9'
