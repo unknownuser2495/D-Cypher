@@ -136,13 +136,6 @@ def stego_extract():
         exit()'''
 
     EOF =  b'\xFF\xD9' if (name_of_file_1_[-4:] ==  ".jpg" or name_of_file_1_ == ".jpeg") else b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82'
-    
-    '''if (name_of_file_1_[-4] ==  ".jpg"):
-        EOF = b'\xFF\xD9'
-
-    elif(name_of_file_1_[-4] ==  ".png"):
-        EOF = b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82'
-        '''
 
     content_of_original_image = ((content_in_image.split(EOF))[0])+EOF
 
