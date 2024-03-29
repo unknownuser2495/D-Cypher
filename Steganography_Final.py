@@ -26,7 +26,10 @@ def stego_embed():
     name_of_file_2 = filedialog.askopenfilename(initialdir = "/",
                                             title = "Select the file that you want to hide",
                                             filetypes = (("jpg files", ".jpg"),("All Files", "*.*")))
-    
+
+    if (name_of_encoded_file == "" or name_of_file_2 == ""):
+        print("Please select a file")
+        exit()
     #Selecting the folder for key
 
     name_of_file_k = filedialog.askdirectory(title = "Select the folder where the \"key.key\" file is located or you want to create")
@@ -38,10 +41,6 @@ def stego_embed():
     name_of_encoded_file = (chr(0)+((name_of_file_2).split('/'))[-1]).encode('utf-8')
 
     password = (input("Enter your passwod. It will be required to decrypt the file. \n")).encode('utf-8')
-
-    if (name_of_encoded_file == "" or name_of_file_2 == ""):
-        print("Please select a file")
-        exit()
 
     #Checking if key files exists or not
     try :
@@ -131,9 +130,11 @@ def stego_extract():
 
     name_of_file_1_ = chr(0)+((name_of_file_1).split('/'))[-1]
 
-    '''if (name_of_file_1 != ".jpg" or name_of_file_1 != ".png"):
+    if (name_of_file_1 == ".jpg" or name_of_file_1 == ".png"):
+        pass
+    else:
         print("Cannot decode content from this file")
-        exit()'''
+        exit()
 
     EOF =  b'\xFF\xD9' if (name_of_file_1_[-4:] ==  ".jpg" or name_of_file_1_ == ".jpeg") else b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82'
 
@@ -188,19 +189,20 @@ if __name__ == "__main__":
   Prompts the user to choose between encryption and decryption.
 
   Returns:
-      int: 1 for encryption, 2 for decryption, or None if invalid choice.
+      int: 1. Embedding content into the image,
+          2. Extracting Steganographic content, or None if invalid choice.
   """
+    while True:
+        print("""Choose from the following options : 
+          1. Embedding content into the image
+          2. Extracting Steganographic content""")
+        choice = int(input("Enter your choice : "))
 
-    print("""Choose from the following options : 
-          1. Encryption
-          2. Decryption""")
-    choice = int(input("Enter your choice : "))
-
-    if choice == 1:  
-        stego_embed()
+        if choice == 1:  
+            stego_embed()
     
-    elif choice == 2:
-        stego_extract()
+        elif choice == 2:
+            stego_extract()
 
-    else:
-        print("Choose from given options")
+        else:
+            print("Choose from given options")
