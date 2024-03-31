@@ -32,6 +32,9 @@ def generate_keys():
     try:
         if not os.path.exists(KEYS_DIR):
             os.makedirs(KEYS_DIR)
+        elif os.path.exists(PRIVATE_KEY_PATH) and os.path.exists(PUBLIC_KEY_PATH):
+            print("Keys already exist.")
+            return
 
         # Generate the private key
         private_key = rsa.generate_private_key(

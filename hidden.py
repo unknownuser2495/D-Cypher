@@ -1,27 +1,25 @@
 import cv2
-import numpy as np
 
 def encode_bit(image, bit, pixel_index, channel_index):
     height, width, channels = image.shape
     pixel = image[pixel_index // width, pixel_index % width]
-    mask_one = [1, 2, 4, 8, 16, 32, 64, 128]
-    mask_zero = [254, 253, 251, 247, 239, 223, 191, 127]
 
+    # Set or clear the least significant bit based on the value of 'bit'
     if bit == 1:
-        pixel[channel_index] |= mask_one[channel_index]
+        pixel[channel_index] |= 1  # Set bit to 1 using bitwise OR
     else:
-        pixel[channel_index] &= mask_zero[channel_index]
-
+        pixel[channel_index] &= ~1  # Set bit to 0 using bitwise AND with complement of 1
+        
     image[pixel_index // width, pixel_index % width] = pixel
     return image
 
 def decode_bit(image, pixel_index, channel_index):
     height, width, channels = image.shape
     pixel = image[pixel_index // width, pixel_index % width]
-    mask_one = [1, 2, 4, 8, 16, 32, 64, 128]
-
-    bit = pixel[channel_index] & mask_one[channel_index] != 0
-    return int(bit)
+    
+    # Extract the least significant bit of the specified channel
+    bit = pixel[channel_index] & 1
+    return bit
 
 def encode_data(image_path, data):
     if isinstance(data, str):
@@ -44,10 +42,12 @@ def encode_data(image_path, data):
 
     for bit in binary_data:
         image = encode_bit(image, int(bit), pixel_index, channel_index)
-        pixel_index += 1
-        if pixel_index >= pixel_count:
-            pixel_index = 0
-            channel_index = (channel_index + 1) % channels
+        if channel_index<2:
+            channel_index += 1
+        else:
+            pixel_index += 1
+            channel_index = 0
+        
     print("Encoding successful.")
     return image
 
@@ -61,13 +61,12 @@ def decode_data(image_path, data_length):
 
     for _ in range(data_length * 8):
         binary_data += str(decode_bit(image, pixel_index, channel_index))
-        pixel_index += 1
-        if pixel_index >= pixel_count:
-            pixel_index = 0
-            channel_index = (channel_index + 1) % channels
+        if channel_index<2:
+            channel_index += 1
+        else:
+            pixel_index += 1
+            channel_index = 0
 
     decoded_data = bytes(int(binary_data[i:i + 8], 2) for i in range(0, len(binary_data), 8))
     print("Decoding successful.")
     return decoded_data
-
-#################################################################################################
