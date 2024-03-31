@@ -3,9 +3,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import os
-# Function to generate AES key using PBKDF2HMAC
-def generate_aes_key(password):
-    salt = os.urandom(16)
+import getpass
+import pickle
+
+def generate_aes_key(password, salt):
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
@@ -14,65 +15,84 @@ def generate_aes_key(password):
         backend=default_backend()
     )
     aes_key = kdf.derive(password.encode())
-    return aes_key,salt
+    return aes_key
 
-def encrypt_file(file_path, aes_key, output_file_path):
-    with open(file_path, 'rb') as file:
-        plaintext = file.read()
+def encrypt_file(file_path, output_file_path):
+    try:
+        with open(file_path, 'rb') as file:
+            plaintext = file.read()
+    except FileNotFoundError:
+        print("File not found:", file_path)
+        return
 
-    iv = os.urandom(16)  # 16 bytes for AES block size
+    salt = os.urandom(16)
+    iv = os.urandom(16)
+    password = getpass.getpass("Enter password: ", stream=None)
+    aes_key = generate_aes_key(password, salt)
+
     cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
     encryptor = cipher.encryptor()
-    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+    ciphyr = encryptor.update(plaintext) + encryptor.finalize()
+
+    encrypted_data = {
+        "salt": salt,
+        "iv": iv,
+        "cipher": ciphyr
+    }
 
     with open(output_file_path, 'wb') as output_file:
-        output_file.write(iv + ciphertext)
+        pickle.dump(encrypted_data, output_file)
+    print("File encrypted successfully!")
 
-# Function to decrypt a file using AES
-def decrypt_file(encrypted_file_path, aes_key, output_file_path):
-    with open(encrypted_file_path, 'rb') as file:
-        iv = file.read(16)  # Read the first 16 bytes for IV
-        ciphertext = file.read()
+def decrypt_file(encrypted_file_path, output_file_path):
+    try:
+        with open(encrypted_file_path, 'rb') as file:
+            encrypted_data = pickle.load(file)
+    except FileNotFoundError:
+        print("File not found:", encrypted_file_path)
+        return
+
+    salt = encrypted_data["salt"]
+    iv = encrypted_data["iv"]
+    ciphyr = encrypted_data["cipher"]
+
+    password = getpass.getpass("Enter password: ", stream=None)
+    aes_key = generate_aes_key(password, salt)
 
     cipher = Cipher(algorithms.AES(aes_key), modes.CFB(iv), backend=default_backend())
     decryptor = cipher.decryptor()
-    plaintext = decryptor.update(ciphertext) + decryptor.finalize()
+    plaintext = decryptor.update(ciphyr) + decryptor.finalize()
 
     with open(output_file_path, 'wb') as output_file:
         output_file.write(plaintext)
+    print("File decrypted successfully!")
 
 def main():
     while True:
         print("\nMain Menu:")
-        print("1. Generate AES key")
-        print("2. Encrypt file with AES")
-        print("3. Decrypt file with AES")
-        print("4. Exit")
+        print("1. Encrypt file with AES")
+        print("2. Decrypt file with AES")
+        print("3. Exit")
 
-        choice = int(input("Enter your choice (1-4): "))
+        choice = input("Enter your choice (1-3): ")
 
-        if choice == 1:
-            password = input("Enter password: ")
-            aes_key = generate_aes_key(password)
-            with open("aes_key.bin", "wb") as key_file:
-                key_file.write(aes_key)
-            print("AES key generated successfully and saved to aes_key.bin")
-        elif choice == 2:
+        if choice == '1':
             file_to_encrypt = input("Enter the path of the file to encrypt: ")
-            output_encrypted_file = input("Enter the path for the encrypted file: ")
-            with open("aes_key.bin", "rb") as key_file:
-                aes_key = key_file.read()
-            encrypt_file(file_to_encrypt, aes_key, output_encrypted_file)
-            print("File encrypted successfully!")
-        elif choice == 3:
+            if not os.path.exists(file_to_encrypt):
+                print("File not found:", file_to_encrypt, " try again.")
+            else:
+                output_encrypted_file = input("Enter the path for the encrypted file: ")
+                encrypt_file(file_to_encrypt, output_encrypted_file)
+                
+        elif choice == '2':
             encrypted_file = input("Enter the path of the file to decrypt: ")
-            output_decrypted_file = input("Enter the path for the decrypted file: ")
-            aes_key_file = input("Enter the path of the file containing AES key: ")
-            with open(aes_key_file, "rb") as key_file:
-                aes_key = key_file.read()
-            decrypt_file(encrypted_file, aes_key, output_decrypted_file)
-            print("File decrypted successfully!")
-        elif choice == 4:
+            if not os.path.exists(encrypted_file):
+                print("File not found:", encrypted_file)
+            else:
+                output_decrypted_file = input("Enter the path for the decrypted file: ")
+                decrypt_file(encrypted_file, output_decrypted_file)
+                
+        elif choice == '3':
             print("Exiting...")
             break
         else:
