@@ -4,9 +4,6 @@ from File_and_Folder_Dialogs import Select_Folder, Select_File
 from Encryption_Decryption import Derive_Key, Read_Salt
 from getpass import getpass
 
-class Steganography:
-    pass
-
 def stego_embed():
 
     #Opening the files
@@ -107,17 +104,13 @@ def stego_extract():
     #Taking password as input from the user
     password = getpass("Enter the password to decrypt the files : ").encode("utf - 8")
     
-    #Generating a key based on the password and salt
+    #Generating the key
+    key = Derive_Key(password, salt)
     try:
-        key = Derive_Key(password, salt)
-
-        #Decoding the content based on the derived key
         decoded_content = key.decrypt(encoded_content)
-
-    #Handling exception if an error occurs while decoding the content due to the wrong key
-    except TypeError or cryptography.fernet.InvalidToken:
-        print("""Key didn't match. 
-Either you've selected the wrong file for key or the password that you have entered is incorrect.""")
+    except cryptography.fernet.InvalidToken as e:
+        print("Error: Decryption failed. Invalid key or corrupted data.")
+        print(f"Exception details: {e}")
         exit()
 
     #Extracting the name of the encoded file and adding it to the folder path
@@ -128,12 +121,21 @@ Either you've selected the wrong file for key or the password that you have ente
     #Writing the decoded content
     f2.write(decoded_content)
 
-    #Removing the Steganographic content from the masking image
-    f1 = open(r"{}".format(masking_file),"wb")
-    f1.write(content_of_original_image)
+    print("Do you want to keep the steganographic content in the file?")
+    ch = int(input("""1. Yes
+2. No   \n"""))
 
-    #Closing all the files
-    f1.close()
+    #Removing the Steganographic content from the masking image
+    if ch == 1: 
+        pass
+    
+    else:
+        f1 = open(r"{}".format(masking_file),"wb")
+        f1.write(content_of_original_image)
+        f1.close()
+
+    #Closing the file
+    f2.close()
     f2.close()
 
     print("File unmasked successfully")
