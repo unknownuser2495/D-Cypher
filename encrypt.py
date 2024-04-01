@@ -67,7 +67,7 @@ def decrypt_file(encrypted_file_path, output_file_path):
         output_file.write(plaintext)
     print("File decrypted successfully!")
 
-def main():
+def menu():
     while True:
         print("\nMain Menu:")
         print("1. Encrypt file with AES")
@@ -99,4 +99,4 @@ def main():
             print("Invalid choice. Please enter a valid option.")
 
 if __name__ == "__main__":
-    main()
+    menu()

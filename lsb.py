@@ -245,7 +245,7 @@ def load_secret_info(filename="secret_info.bin"):
         cipherlen = int.from_bytes(cipherlen, byteorder='big')
     return enc_session_key, salt, iv, cipherlen
     
-def main():
+def menu():
     while True:
         print("\n--- Main Menu ---")
         print("1. Generate Keys")
@@ -267,4 +267,4 @@ def main():
             print("Invalid choice. Please enter a number from 1 to 4.")
 
 if __name__ == "__main__":
-    main()
+    menu()
