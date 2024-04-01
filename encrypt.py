@@ -88,8 +88,12 @@ def decrypt_file(encrypted_file_path, output_file_path):
         output_file.write(plaintext)
     print("File decrypted successfully!")
 
+<<<<<<< HEAD
 # Main function to provide user interface
 def main():
+=======
+def menu():
+>>>>>>> ff0592dc9cf533e0d7df7476ddaf8ed151da4956
     while True:
        
         print("\nMain Menu:")
@@ -127,4 +131,4 @@ def main():
             print("Invalid choice. Please enter a valid option.")
 
 if __name__ == "__main__":
-    main()
+    menu()
